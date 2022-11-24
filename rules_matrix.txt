@@ -1,0 +1,7 @@
+Other	1	1	1	1	1	1	1
+Description	1	0	1	1	1	1	1
+Rate	0	0	0	1	1	1	1
+CurrentHours	0	0	1	0	1	1	1
+CurrentAmount	0	0	1	1	0	1	1
+YtdHours	0	0	1	0	1	0	1
+YtdAmount	0	0	1	1	0	1	0

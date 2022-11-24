@@ -1,0 +1,1 @@
+Description	2	0	0Rate	0	3	1CurrentAmount	0	2	3
