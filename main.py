@@ -1,3 +1,4 @@
+import time
 import numpy as np
 import utils
 
@@ -39,7 +40,7 @@ def run(config):
 
     # generate all possible combinations of columns placement with restriction that one column can be assigned only once
     # (we can  treat them as branches of trees or paths of graphs, so let's call them branches)
-    branches = np.array(list(utils.product(*adjacency_matrix)))
+    branches = np.array(list(utils.permutations_optimised(range(adjacency_matrix.shape[0]))))
 
     # apply restrictions on branches based on indicators in Adjacency Matrix and Rules Matrix
     branches_valid = utils.select_valid_branches(
@@ -51,11 +52,6 @@ def run(config):
     names, scores = utils.get_optimal_solution(
         branches_scores, branches_valid, input_table_names
     )
-
-    # remove duplicated combinations if any (in case if there are two or more Other columns switched between each other)
-    if np.unique(names, axis=0).shape[0] == 1:
-        names = np.unique(names, axis=0)
-        scores = np.unique(scores, axis=0)
 
     # print summary and results
     if eval(config['run']['echo']):
@@ -71,7 +67,7 @@ def run(config):
         Optimal composition:
         Num compositions: {}
         Compositions: {}
-        Compositions scores: {}
+        Compositions scores: {} {}
         """.format(
             input_table_scores.shape[1],
             input_table_scores.shape[0] ** input_table_scores.shape[1],
@@ -86,6 +82,7 @@ def run(config):
             len(names),
             [[", ".join(c)] if len(names) > 1 else ", ".join(c) for c in names],
             scores if len(scores) > 1 else scores[0],
+            '(same for each composition)' if len(names) > 1 else ''
         )
         print(output_str)
 
@@ -93,5 +90,7 @@ def run(config):
 
 
 if __name__ == "__main__":
+    start = time.time()
     config = utils.get_config()
     names, scores = run(config)
+    print('Wall running time:', round(time.time() - start, 2), 'sec')
