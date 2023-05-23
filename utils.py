@@ -62,9 +62,10 @@ def enrich_input_table(table, names):
     """
     cols_rows_diff = table.shape[1] - table.shape[0]
     if cols_rows_diff > 0:
-        other_id = np.where(names == "Other")[0][0]
-        table = dup_rows(table, other_id, cols_rows_diff)
-        names = np.insert(names, other_id, "Other")
+        for _ in range(cols_rows_diff):
+            other_id = np.where(names == "Other")[0][0]
+            table = dup_rows(table, other_id, cols_rows_diff)
+            names = np.insert(names, other_id, "Other")
     return names, table
 
 
@@ -160,6 +161,27 @@ def form_rules_matrix(tab_names, rules_names, rules_matrix):
         result += np.where(rules_mat_res[i] == 1)
 
     return result
+
+
+def permutations_optimised(iterable):
+    pool = tuple(iterable)
+    n = len(pool)
+    indices = list(range(n))
+    cycles = list(range(n, 0, -1))
+    yield tuple(pool[i] for i in indices[:n])
+    while n:
+        for i in reversed(range(n)):
+            cycles[i] -= 1
+            if cycles[i] == 0:
+                indices[i:] = indices[i+1:] + indices[i:i+1]
+                cycles[i] = n - i
+            else:
+                j = cycles[i]
+                indices[i], indices[-j] = indices[-j], indices[i]
+                yield tuple(pool[i] for i in indices[:n])
+                break
+        else:
+            return
 
 
 def product(*args, with_trace=False):
@@ -269,6 +291,10 @@ def get_optimal_solution(branches_scores, branches, table_names):
     for i, tree in enumerate(optimal_branches):
         optimal_branches_names.append([e for _, e in sorted(zip(tree, table_names))])
         scores.append(sum(optimal_branches_scores[i]))
+
+    # remove duplicated combinations if any
+    optimal_branches_names = np.unique(optimal_branches_names, axis=0)
+    scores = np.unique(scores, axis=0)
 
     return optimal_branches_names, scores
 
